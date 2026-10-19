@@ -45,7 +45,7 @@
       <button onclick="appendVal('1')">1</button>
       <button onclick="appendVal('2')">2</button>
       <button onclick="appendVal('3')">3</button>
-      <button class="orange" onclick="checkSecret('+')">+</button>
+      <button class="orange" onclick="appendVal('+')">+</button>
       <button class="zero" onclick="appendVal('0')">0</button>
       <button onclick="appendVal('.')">.</button>
       <button class="orange" onclick="calculate()">=</button>
@@ -54,12 +54,12 @@
 
   <!-- الخزنة السرية -->
   <div id="vault">
-    <h1>🗄️ الخزنة السرية الخاصة</h1>
-    <p style="color: #888;">هنا صورك وملفاتك المخفية بعيداً عن العيون</p>
+    <h1>🗄️ Secret Vault</h1>
+    <p style="color: #888;">Upload and hide your private photos here</p>
     <div class="upload-box">
       <input type="file" id="fileInput" multiple accept="image/*" onchange="loadFiles(event)">
     </div>
-    <button onclick="lockVault()" style="background: #ff3b30; width: 100%; border-radius: 10px; height: 50px; font-size: 18px; margin-top: 10px;">إقفال الخزنة والخروج</button>
+    <button onclick="lockVault()" style="background: #ff3b30; color: #fff; width: 100%; border: none; border-radius: 10px; height: 50px; font-size: 18px; font-weight: bold; margin-top: 10px; cursor: pointer;">Lock & Exit</button>
     <div class="gallery" id="gallery"></div>
   </div>
 
@@ -84,17 +84,8 @@
       updateDisplay();
     }
 
-    function checkSecret(op) {
-      // الرمز السري المطلوب: إذا كتبت 4321 وضغطت زر (+) تفتح الخزنة فوراً
-      if (currentInput === "4321") {
-        document.getElementById('vault').style.display = 'block';
-        clearDisp();
-        return;
-      }
-      appendVal(op);
-    }
-
     function calculate() {
+      // الرمز السري الصحيح 100%
       if (currentInput === "4321") {
         document.getElementById('vault').style.display = 'block';
         clearDisp();
