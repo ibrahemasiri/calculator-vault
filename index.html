@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Calculator">
   <style>
-    body { margin: 0; background: #000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; align-items: height; height: 100vh; overflow: hidden; }
+    body { margin: 0; background: #000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
     .calculator { width: 100%; max-width: 400px; background: #000; padding: 20px; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; box-sizing: border-box; }
     #display { color: #fff; font-size: 80px; text-align: left; margin-bottom: 20px; font-weight: 300; padding: 0 10px; word-wrap: break-word; }
     .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
@@ -52,7 +52,7 @@
     </div>
   </div>
 
-  <!-- الخزنة السرية (تفتح بكلمة المرور 1234=) -->
+  <!-- الخزنة السرية -->
   <div id="vault">
     <h1>🗄️ الخزنة السرية الخاصة</h1>
     <p style="color: #888;">هنا صورك وملفاتك المخفية بعيداً عن العيون</p>
@@ -65,15 +65,12 @@
 
   <script>
     let currentInput = "0";
-    const secretCode = "1234=";
-    let inputSequence = "";
 
     function updateDisplay() {
       document.getElementById('display').innerText = currentInput;
     }
 
     function appendVal(val) {
-      inputSequence += val;
       if (currentInput === "0" && val !== '.') {
         currentInput = val;
       } else {
@@ -84,13 +81,12 @@
 
     function clearDisp() {
       currentInput = "0";
-      inputSequence = "";
       updateDisplay();
     }
 
     function calculate() {
-      // فحص الخدعة: إذا أدخلت 1234 ثم ضغطت = تفتح الخزنة
-      if (inputSequence === secretCode) {
+      // الرمز السري: إذا كتبت 1234 وحطيت علامة × أو = تفتح الخزنة مباشرة
+      if (currentInput === "1234" || currentInput === "1234×" || currentInput === "1234=") {
         document.getElementById('vault').style.display = 'block';
         clearDisp();
         return;
@@ -100,12 +96,12 @@
       } catch (e) {
         currentInput = "خطأ";
       }
-      inputSequence = "";
       updateDisplay();
     }
 
     function lockVault() {
       document.getElementById('vault').style.display = 'none';
+      clearDisp();
     }
 
     function loadFiles(event) {
