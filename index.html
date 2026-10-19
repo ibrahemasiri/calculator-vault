@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Calculator">
+  <style>
+    body { margin: 0; background: #000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; align-items: height; height: 100vh; overflow: hidden; }
+    .calculator { width: 100%; max-width: 400px; background: #000; padding: 20px; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; box-sizing: border-box; }
+    #display { color: #fff; font-size: 80px; text-align: left; margin-bottom: 20px; font-weight: 300; padding: 0 10px; word-wrap: break-word; }
+    .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+    button { background: #333; color: #fff; border: none; font-size: 32px; height: 75px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+    button.gray { background: #a6a6a6; color: #000; }
+    button.orange { background: #ff9f0a; color: #fff; }
+    button.zero { grid-column: span 2; border-radius: 40px; width: 100%; justify-content: flex-start; padding-right: 30px; }
+    /* الخزنة السرية */
+    #vault { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; color: #fff; padding: 30px; box-sizing: border-box; overflow-y: auto; z-index: 100; text-align: center; }
+    #vault h1 { color: #ff9f0a; font-size: 24px; }
+    .upload-box { background: #222; border: 2px dashed #444; padding: 20px; border-radius: 12px; margin: 20px 0; }
+    .gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 20px; }
+    .gallery img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+  <!-- واجهة الحاسبة -->
+  <div class="calculator" id="calcScreen">
+    <div id="display">0</div>
+    <div class="buttons">
+      <button class="gray" onclick="clearDisp()">AC</button>
+      <button class="gray" onclick="appendVal('+/-')">+/-</button>
+      <button class="gray" onclick="appendVal('%')">%</button>
+      <button class="orange" onclick="appendVal('/')">÷</button>
+      <button onclick="appendVal('7')">7</button>
+      <button onclick="appendVal('8')">8</button>
+      <button onclick="appendVal('9')">9</button>
+      <button class="orange" onclick="appendVal('*')">×</button>
+      <button onclick="appendVal('4')">4</button>
+      <button onclick="appendVal('5')">5</button>
+      <button onclick="appendVal('6')">6</button>
+      <button class="orange" onclick="appendVal('-')">-</button>
+      <button onclick="appendVal('1')">1</button>
+      <button onclick="appendVal('2')">2</button>
+      <button onclick="appendVal('3')">3</button>
+      <button class="orange" onclick="appendVal('+')">+</button>
+      <button class="zero" onclick="appendVal('0')">0</button>
+      <button onclick="appendVal('.')">.</button>
+      <button class="orange" onclick="calculate()">=</button>
+    </div>
+  </div>
+
+  <!-- الخزنة السرية (تفتح بكلمة المرور 1234=) -->
+  <div id="vault">
+    <h1>🗄️ الخزنة السرية الخاصة</h1>
+    <p style="color: #888;">هنا صورك وملفاتك المخفية بعيداً عن العيون</p>
+    <div class="upload-box">
+      <input type="file" id="fileInput" multiple accept="image/*" onchange="loadFiles(event)">
+    </div>
+    <button onclick="lockVault()" style="background: #ff3b30; width: 100%; border-radius: 10px; height: 50px; font-size: 18px; margin-top: 10px;">إقفال الخزنة والخروج</button>
+    <div class="gallery" id="gallery"></div>
+  </div>
+
+  <script>
+    let currentInput = "0";
+    const secretCode = "1234=";
+    let inputSequence = "";
+
+    function updateDisplay() {
+      document.getElementById('display').innerText = currentInput;
+    }
+
+    function appendVal(val) {
+      inputSequence += val;
+      if (currentInput === "0" && val !== '.') {
+        currentInput = val;
+      } else {
+        currentInput += val;
+      }
+      updateDisplay();
+    }
+
+    function clearDisp() {
+      currentInput = "0";
+      inputSequence = "";
+      updateDisplay();
+    }
+
+    function calculate() {
+      // فحص الخدعة: إذا أدخلت 1234 ثم ضغطت = تفتح الخزنة
+      if (inputSequence === secretCode) {
+        document.getElementById('vault').style.display = 'block';
+        clearDisp();
+        return;
+      }
+      try {
+        currentInput = eval(currentInput.replace('×', '*').replace('÷', '/')).toString();
+      } catch (e) {
+        currentInput = "خطأ";
+      }
+      inputSequence = "";
+      updateDisplay();
+    }
+
+    function lockVault() {
+      document.getElementById('vault').style.display = 'none';
+    }
+
+    function loadFiles(event) {
+      const files = event.target.files;
+      const gallery = document.getElementById('gallery');
+      for (let i = 0; i < files.length; i++) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          gallery.appendChild(img);
+        }
+        reader.readAsDataURL(files[i]);
+      }
+    }
+  </script>
+</body>
+</html>
