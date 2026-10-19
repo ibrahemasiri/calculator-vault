@@ -16,12 +16,19 @@
     button.gray { background: #a6a6a6; color: #000; }
     button.orange { background: #ff9f0a; color: #fff; }
     button.zero { grid-column: span 2; border-radius: 40px; width: 100%; justify-content: flex-start; padding-left: 30px; }
+    
     /* الخزنة السرية */
-    #vault { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; color: #fff; padding: 30px; box-sizing: border-box; overflow-y: auto; z-index: 100; text-align: center; }
-    #vault h1 { color: #ff9f0a; font-size: 24px; }
-    .upload-box { background: #222; border: 2px dashed #444; padding: 20px; border-radius: 12px; margin: 20px 0; }
-    .gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 20px; }
-    .gallery img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; }
+    #vault { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; color: #fff; padding: 20px; box-sizing: border-box; overflow-y: auto; z-index: 100; text-align: center; }
+    #vault h1 { color: #ff9f0a; font-size: 22px; margin-bottom: 5px; }
+    .upload-box { background: #222; border: 2px dashed #444; padding: 15px; border-radius: 12px; margin: 15px 0; }
+    .gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+    .gallery img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer; }
+
+    /* نافذة عرض الصورة المكبرة */
+    #viewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 200; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+    #viewer img { max-width: 100%; max-height: 70vh; border-radius: 10px; object-fit: contain; }
+    .viewer-btns { display: flex; gap: 10px; margin-top: 20px; width: 100%; max-width: 300px; justify-content: center; }
+    .viewer-btns button { font-size: 16px; height: 45px; border-radius: 8px; flex: 1; border: none; font-weight: bold; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -54,17 +61,30 @@
 
   <!-- الخزنة السرية -->
   <div id="vault">
-    <h1>🗄️ Secret Vault</h1>
-    <p style="color: #888;">Upload and hide your private photos here</p>
+    <h1>🔥 أرشيف عمك المشايخ 😎</h1>
+    <p style="color: #888; font-size: 14px;">خزنة الصور والملفات السرية الخاصة</p>
     <div class="upload-box">
       <input type="file" id="fileInput" multiple accept="image/*" onchange="loadFiles(event)">
     </div>
-    <button onclick="lockVault()" style="background: #ff3b30; color: #fff; width: 100%; border: none; border-radius: 10px; height: 50px; font-size: 18px; font-weight: bold; margin-top: 10px; cursor: pointer;">Lock & Exit</button>
+    <button onclick="lockVault()" style="background: #ff3b30; color: #fff; width: 100%; border: none; border-radius: 10px; height: 45px; font-size: 16px; font-weight: bold; cursor: pointer;">إقفال الخزنة والخروج</button>
     <div class="gallery" id="gallery"></div>
+  </div>
+
+  <!-- نافذة تكبير الصورة والتنقل بينها -->
+  <div id="viewer">
+    <img id="fullImg" src="" alt="Zoomed">
+    <div class="viewer-btns">
+      <button style="background: #333; color:#fff;" onclick="prevImg()">السابق</button>
+      <button style="background: #ff3b30; color:#fff;" onclick="deleteCurrentImg()">حذف</button>
+      <button style="background: #333; color:#fff;" onclick="nextImg()">التالي</button>
+    </div>
+    <button onclick="closeViewer()" style="background: #555; color: #fff; width: 100%; max-width: 300px; margin-top: 10px; height: 40px; border-radius: 8px; border:none; cursor:pointer;">إغلاق المعرض</button>
   </div>
 
   <script>
     let currentInput = "0";
+    let imagesArr = [];
+    let currentIndex = 0;
 
     function updateDisplay() {
       document.getElementById('display').innerText = currentInput;
@@ -85,7 +105,6 @@
     }
 
     function calculate() {
-      // الرمز السري الصحيح 100%
       if (currentInput === "4321") {
         document.getElementById('vault').style.display = 'block';
         clearDisp();
@@ -106,15 +125,61 @@
 
     function loadFiles(event) {
       const files = event.target.files;
-      const gallery = document.getElementById('gallery');
       for (let i = 0; i < files.length; i++) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          const img = document.createElement('img');
-          img.src = e.target.result;
-          gallery.appendChild(img);
+          imagesArr.push(e.target.result);
+          renderGallery();
         }
         reader.readAsDataURL(files[i]);
+      }
+    }
+
+    function renderGallery() {
+      const gallery = document.getElementById('gallery');
+      gallery.innerHTML = "";
+      imagesArr.forEach((src, index) => {
+        const img = document.createElement('img');
+        img.src = src;
+        img.onclick = () => openViewer(index);
+        gallery.appendChild(img);
+      });
+    }
+
+    function openViewer(index) {
+      currentIndex = index;
+      document.getElementById('fullImg').src = imagesArr[currentIndex];
+      document.getElementById('viewer').style.display = 'flex';
+    }
+
+    function closeViewer() {
+      document.getElementById('viewer').style.display = 'none';
+    }
+
+    function nextImg() {
+      if (imagesArr.length > 0) {
+        currentIndex = (currentIndex + 1) % imagesArr.length;
+        document.getElementById('fullImg').src = imagesArr[currentIndex];
+      }
+    }
+
+    function prevImg() {
+      if (imagesArr.length > 0) {
+        currentIndex = (currentIndex - 1 + imagesArr.length) % imagesArr.length;
+        document.getElementById('fullImg').src = imagesArr[currentIndex];
+      }
+    }
+
+    function deleteCurrentImg() {
+      if (imagesArr.length > 0) {
+        imagesArr.splice(currentIndex, 1);
+        renderGallery();
+        if (imagesArr.length === 0) {
+          closeViewer();
+        } else {
+          currentIndex = currentIndex % imagesArr.length;
+          document.getElementById('fullImg').src = imagesArr[currentIndex];
+        }
       }
     }
   </script>
