@@ -45,7 +45,7 @@
       <button onclick="appendVal('1')">1</button>
       <button onclick="appendVal('2')">2</button>
       <button onclick="appendVal('3')">3</button>
-      <button class="orange" onclick="appendVal('+')">+</button>
+      <button class="orange" onclick="checkSecret('+')">+</button>
       <button class="zero" onclick="appendVal('0')">0</button>
       <button onclick="appendVal('.')">.</button>
       <button class="orange" onclick="calculate()">=</button>
@@ -84,9 +84,18 @@
       updateDisplay();
     }
 
+    function checkSecret(op) {
+      // الرمز السري المطلوب: إذا كتبت 4321 وضغطت زر (+) تفتح الخزنة فوراً
+      if (currentInput === "4321") {
+        document.getElementById('vault').style.display = 'block';
+        clearDisp();
+        return;
+      }
+      appendVal(op);
+    }
+
     function calculate() {
-      // الرمز السري: اكتب 1234 ثم اضغط على زر التساوي =
-      if (currentInput === "1234" || currentInput === "1234=") {
+      if (currentInput === "4321") {
         document.getElementById('vault').style.display = 'block';
         clearDisp();
         return;
